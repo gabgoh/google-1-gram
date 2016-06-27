@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+
+@font-face { font-family: Computer Modern; src: url('cmunorm.ttf'); }
+
+text{
+  font: bold 12px Computer Modern;
+  font-family: Computer Modern;
+}
+
+.link {
+  font: bold;
+  cursor: pointer
+}
+
+.sideLeft {
+  position: fixed;
+  left: 50%;
+  top:0%;
+  margin-left: -414px;
+}
+
+.sideRight {
+  position: fixed;
+  left: 50%;
+  top:0%;
+  margin-left: 214px;
+}
+
+.centered {
+  position: fixed;
+  left: 50%;
+  top:0%;
+  margin-left: -214px;
+}
+
+</style>
+
+<title>Google n-gram visualization</title>
+
+<body bgcolor = "white">
+
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="SortedTimeSeries1"></script>
+<script src="SortedWords1"></script>
+
+<script src="SortedTimeSeries2"></script>
+<script src="SortedWords2"></script>
+
+<script src="SortedTimeSeries3"></script>
+<script src="SortedWords3"></script>
+
+<script src="SortedTimeSeries4"></script>
+<script src="SortedWords4"></script>
+
+<script src="SortedTimeSeries5"></script>
+<script src="SortedWords5"></script>
+
+<script src="SortedTimeSeries6"></script>
+<script src="SortedWords6"></script>
+
+<script src="SortedTimeSeries7"></script>
+<script src="SortedWords7"></script>
+
+<script src="SortedTimeSeries8"></script>
+<script src="SortedWords8"></script>
+<div id="example1"></div>
+
+<script>
+
+ytop = 150
+
+var sideBarLeft = d3.select("body")
+  .append("svg")
+  .attr("width", 200)
+  .attr("height",2000)
+  .attr("class", "sideLeft")
+
+var wordDisplay = sideBarLeft.append("text")
+
+wordDisplay.attr("x", 190)
+    .attr("y", 60)
+    .attr("text-anchor", "end")
+
+
+var sideBarRight = d3.select("body")
+  .append("svg")
+  .attr("width", 200)
+  .attr("height",2000)
+  .attr("class", "sideRight")
+
+var sideBarLinks = sideBarRight.append("svg")
+  .selectAll("null")
+  .data([[TS1, W1], 
+         [TS2, W2], 
+         [TS3, W3],
+         [TS4, W4],
+         [TS5, W5],
+         [TS6, W6],
+         [TS7, W7],
+         [TS8, W8]])
+  .enter()
+
+sideBarLinks.append("text")
+  .attr("x", 30)
+  .attr("y", function(d,i) {return 150 + 20*i})
+  .text(function(d,i) { return "Group "+i})
+  .attr("class", "link")
+  .on("click", function(d,i) { refreshData(d[0], d[1])} )
+  .on("mouseover", function(d,i) {d3.select(this).attr("fill","red")})
+  .on("mouseout", function(d,i) {d3.select(this).attr("fill","black")})
+
+
+var rectDemo = d3.select("body").
+  append("svg:svg").
+  attr("width", 107*4).
+  attr("height", 2000).
+  attr("id", "page").
+  attr("class", "centered").
+  attr("background-color","black")
+
+rectDemo.append("line")
+  .attr("x1",0)
+  .attr("y1",0)
+  .attr("x2",0)
+  .attr("y2",1000)
+  .attr("stroke","black")
+  .attr("stroke-width",0.5)
+
+rectDemo.append("line")
+  .attr("x1",107*4)
+  .attr("y1",0)
+  .attr("x2",107*4)
+  .attr("y2",1000)
+  .attr("stroke","black")
+  .attr("stroke-width",0.5)
+
+
+line = d3.svg.line()
+    .x(function(d,i) { return 4*i; })
+    .y(function(d,i) { return ytop - d; });
+
+var mouseoverfungen = function (j,W) { 
+  return function(d,i) {
+    yshift = (d[0])
+    wordDisplay.text(W[j])
+    wordDisplay.attr("y", 2.4*j + ytop - yshift)
+    //d3.select(this.parentNode).attr("color", "red")
+    d3.select(this.parentNode).select("#timeline").attr("stroke-width", 1.5)
+    .attr("color","red")
+  }
+} 
+
+var mouseoutfungen = function (j,W) { 
+  return function(d,i) {
+    //d3.select(this.parentNode).attr("color", "black")
+        d3.select(this.parentNode).select("#timeline").attr("stroke-width", 0.2)
+        .attr("color","black")
+  }
+} 
+
+
+for (var j = 0; j < 200; j++) {
+
+  var word = rectDemo
+    .append("g")
+    .attr("id", "Word"+j)
+    .attr("color","black")
+    .attr("transform", function(d,i) { return "translate(0,"+2.4*j+")"})
+
+  var scatterContainer = word.selectAll("null").data(TS1[j])
+
+  scatterContainer.enter()
+    .append("svg:circle")
+    .attr("cx", function(d,i) { return 4*i })
+    .attr("cy", function(d,i) { return ytop - d})
+    .attr("r",  function(d,i) { return calcSize(d) })
+    .attr("fill","currentColor")
+    .attr("class", "Circle")
+    .attr("feather",2)
+
+  var wordlineContainer = word.selectAll("null").data([TS1[j]])
+
+  var wordline = wordlineContainer.enter()
+
+  wordline.append("path")
+    .attr("id", "hitbox")
+    .attr("class", "line")
+    .attr("d", line)
+    .attr("fill", "none")
+    .attr("stroke", "red")
+    .attr("stroke-width", 5)
+    .attr("opacity", 0)
+    .on("mouseover", mouseoverfungen(j,W1) )
+    .on("mouseout", mouseoutfungen(j,W1))
+
+  wordline.append("path")
+    .attr("id", "timeline")
+    .attr("class", "line")
+    .attr("d", line)
+    .attr("fill", "none")
+    .attr("stroke", "currentColor")
+    .attr("stroke-width", 0.2)
+
+}
+
+function refreshData(TS,W) {
+
+  wordDisplay.text("")
+
+  for (var j = 0; j < 200; j++) {
+
+    var c = d3.selectAll("#Word"+j)
+    
+    c.selectAll("circle").data(TS[j])
+      .attr("cx", function(d,i) { return 4*i })
+      .attr("cy", function(d,i) { return ytop - d})
+      .attr("r",  function(d,i) { return calcSize(d) })
+
+    c.selectAll("path").data([TS[j],TS[j]]).attr("d",line)
+    .on("mouseover", mouseoverfungen(j,W) )
+    .on("mouseout", mouseoutfungen(j,W))
+
+  }
+
+}
+
+function calcSize(t){
+  if (Math.abs(t) < 0.0000001){
+    return 0
+  }
+  return Math.min(3,250*Math.pow(Math.abs(t/2700),1.2))
+}
+
+
+</script>
+
+</body>
